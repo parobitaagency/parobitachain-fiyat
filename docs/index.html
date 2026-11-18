@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>ParobitaChain — Fotoğraflı Alış Fiyatları</title>
+<style>
+  :root{--bg:#0b0b0b;--card:#141414;--line:#262626;--fg:#f2f2f2;--mute:#8a8a8a;--acc:#e8d9b5;--warn:#ff8a5c}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 -apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}
+  header{position:sticky;top:0;z-index:5;background:rgba(11,11,11,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+  .bar{max-width:1280px;margin:0 auto;padding:14px 20px;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center}
+  h1{font-size:16px;letter-spacing:.08em;text-transform:uppercase;margin:0;font-weight:600}
+  .ctl{display:flex;gap:16px;align-items:center;color:var(--mute);font-size:13px;flex-wrap:wrap}
+  .ctl input{width:84px;background:#000;border:1px solid var(--line);color:var(--fg);padding:6px 8px;border-radius:6px;font:inherit}
+  .ctl input[type=search]{width:200px}
+  nav{max-width:1280px;margin:0 auto;padding:0 20px 12px;display:flex;gap:8px;flex-wrap:wrap}
+  nav a{color:var(--mute);text-decoration:none;font-size:12px;border:1px solid var(--line);border-radius:999px;padding:4px 10px}
+  nav a:hover{color:var(--fg);border-color:#444}
+  main{max-width:1280px;margin:0 auto;padding:8px 20px 60px}
+  h2{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc);margin:36px 0 14px;font-weight:600;scroll-margin-top:120px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
+  .main{aspect-ratio:1;background:#000;display:block;width:100%;object-fit:contain}
+  .thumbs{display:flex;gap:4px;padding:6px;overflow-x:auto;border-bottom:1px solid var(--line)}
+  .thumbs img{width:44px;height:44px;object-fit:cover;border-radius:4px;opacity:.55;cursor:pointer;border:1px solid transparent;flex:none}
+  .thumbs img.on{opacity:1;border-color:#555}
+  .body{padding:10px 12px 12px;display:flex;flex-direction:column;gap:6px;flex:1}
+  .name{font-weight:600;font-size:14px}
+  .no{color:var(--mute);font-size:11px}
+  .prices{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:2px}
+  .p{background:#0d0d0d;border:1px solid var(--line);border-radius:6px;padding:6px 7px}
+  .p b{display:block;font-size:15px;font-variant-numeric:tabular-nums}
+  .p span{font-size:10px;color:var(--mute);text-transform:uppercase;letter-spacing:.05em}
+  .p.k b{color:var(--acc)}
+  .note{font-size:12px;color:var(--mute)}
+  .note.warn{color:var(--warn)}
+  .foot{color:var(--mute);font-size:12px;margin-top:40px;border-top:1px solid var(--line);padding-top:14px}
+  @media print{header{position:static}nav,.ctl input[type=search]{display:none}.card{break-inside:avoid}}
+
+  .info{max-width:1280px;margin:0 auto;padding:0 20px 10px;font-size:12px;color:var(--mute)}
+  .info b{color:var(--fg)}
+  .alarm{background:#3a1408;border:1px solid var(--warn);color:#ffd2c0;padding:10px 14px;border-radius:8px;margin:10px auto 0;max-width:1240px;font-size:13px}
+  #gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:50}
+  #gate form{display:flex;flex-direction:column;gap:10px;width:280px}
+  #gate input,#gate button{padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:#000;color:var(--fg);font:inherit}
+  #gate button{background:var(--acc);color:#000;font-weight:600;cursor:pointer}
+  #gate .err{color:var(--warn);font-size:12px;min-height:16px}
+</style>
+</head>
+<body>
+<div id="gate"><form id="gf"><h1>ParobitaChain</h1><input id="pw" type="password" placeholder="Şifre" autocomplete="current-password" autofocus><button>Aç</button><div class="err" id="gerr"></div></form></div>
+<header>
+  <div class="bar">
+    <h1>ParobitaChain · Alış Fiyatları</h1>
+    <div class="ctl">
+      <label>Dolar kuru <input id="kur" type="number" step="0.01" value="49.85"></label>
+      <label>KDV % <input id="kdv" type="number" step="1" value="20"></label>
+      <input id="q" type="search" placeholder="Ürün ara…">
+      <span id="count"></span>
+    </div>
+  </div>
+  <div class="info" id="info">Kur yükleniyor…</div>
+  <nav id="nav"></nav>
+</header>
+<div id="alarmBox"></div>
+<main id="main"></main>
+<script>
+const LISTE_KURU=49.85, ESIK=2;
+let DATA=[];
+const fmt=n=>Math.round(n).toLocaleString('tr-TR')+' TL';
+const main=document.getElementById('main'),nav=document.getElementById('nav');
+function render(){
+  const kur=parseFloat(document.getElementById('kur').value)||0;
+  const kdv=(parseFloat(document.getElementById('kdv').value)||0)/100;
+  const q=document.getElementById('q').value.trim().toLocaleLowerCase('tr');
+  main.innerHTML='';nav.innerHTML='';let total=0;
+  DATA.forEach((c,ci)=>{
+    const items=c.items.filter(it=>!q||it.name.toLocaleLowerCase('tr').includes(q)||it.photos.some(p=>String(p[0])===q));
+    if(!items.length)return;
+    total+=items.length;
+    const id='c'+ci;
+    nav.insertAdjacentHTML('beforeend',`<a href="#${id}">${c.cat} (${items.length})</a>`);
+    const sec=document.createElement('section');
+    sec.innerHTML=`<h2 id="${id}">${c.cat}</h2><div class="grid"></div>`;
+    const grid=sec.querySelector('.grid');
+    items.forEach(it=>{
+      let usd='—',tl='—',k='—';
+      if(it.usd!=null){usd='$'+it.usd;tl=fmt(it.usd*kur);k=fmt(it.usd*kur*(1+kdv));}
+      else if(it.kdv!=null){k=fmt(it.kdv);tl=fmt(it.kdv/(1+kdv));}
+      const warn=it.usd==null&&it.kdv==null;
+      const nums=it.photos.map(p=>p[0]).join(', ');
+      const card=document.createElement('div');card.className='card';
+      card.innerHTML=`<img class="main" src="${it.photos[0][1]}" alt="${it.name}">
+        ${it.photos.length>1?`<div class="thumbs">${it.photos.map((p,i)=>`<img src="${p[1]}" data-i="${i}" class="${i?'':'on'}" alt="foto ${p[0]}" title="foto ${p[0]}">`).join('')}</div>`:''}
+        <div class="body"><div class="name">${it.name}</div><div class="no">Foto: ${nums}</div>
+        <div class="prices"><div class="p"><span>Alış $</span><b>${usd}</b></div><div class="p"><span>Alış TL</span><b>${tl}</b></div><div class="p k"><span>KDV dahil</span><b>${k}</b></div></div>
+        ${it.note?`<div class="note${warn?' warn':''}">${it.note}</div>`:''}</div>`;
+      card.querySelectorAll('.thumbs img').forEach(t=>t.onclick=()=>{card.querySelector('.main').src=t.src;card.querySelectorAll('.thumbs img').forEach(x=>x.classList.toggle('on',x===t));});
+      grid.appendChild(card);
+    });
+    main.appendChild(sec);
+  });
+  document.getElementById('count').textContent=total+' ürün';
+  main.insertAdjacentHTML('beforeend',`<div class="foot">Fiyatlar Mert Bey ile WhatsApp sohbetinden (en güncel: 31.03.2026 kataloğu ve sonraki güncellemeler; Ocak'taki zincirli seriye +2$ eklendi). TL = $ × kur; KDV dahil = TL × (1 + KDV). Tedarikçimiz Vahap'ın ürünleri KDV dahil 1.200 TL. Foto numaraları "Untitled design-4" klasöründeki dosya adlarıdır.</div>`);
+}
+
+const $=id=>document.getElementById(id);
+const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function decrypt(pw){
+  const e=await (await fetch('data.enc.json',{cache:'no-store'})).json();
+  const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);
+  const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt:b64(e.salt),iterations:e.it,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['decrypt']);
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(e.iv)},key,b64(e.ct));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+const pct=(a,b)=>(a-b)/b*100, sgn=n=>(n>0?'+':'')+n.toFixed(1)+'%';
+async function loadKur(){
+  let saved=null; try{saved=await (await fetch('rate.json',{cache:'no-store'})).json();}catch{}
+  let live=null; try{live=(await (await fetch('https://open.er-api.com/v6/latest/USD')).json()).rates.TRY;}catch{}
+  const kur=live||saved?.rate||LISTE_KURU;
+  $('kur').value=(Math.round(kur*100)/100).toFixed(2);
+  const h=(saved?.history||[]); const prev=h.length>1?h[h.length-2]:null;
+  const gun=prev?pct(saved.rate,prev.rate):0;
+  $('info').innerHTML=`Kur: <b>${kur.toFixed(2)} TL</b> (${live?'canlı':'son kayıt '+(saved?.date||'—')}) · Listenin kuru 49,85 → ${sgn(pct(kur,LISTE_KURU))}`+(prev?` · Son günlük değişim ${sgn(gun)}`:'');
+  if(prev&&Math.abs(gun)>=ESIK) $('alarmBox').innerHTML=`<div class="alarm">⚠ Dolar bir günde ${sgn(gun)} değişti (${prev.rate} → ${saved.rate}). Satış fiyatlarını kontrol et.</div>`;
+  render();
+}
+async function open_(pw){
+  DATA=await decrypt(pw);
+  try{localStorage.setItem('pc_pw',pw);}catch{}
+  $('gate').remove(); render(); loadKur();
+}
+$('gf').addEventListener('submit',async e=>{e.preventDefault();$('gerr').textContent='';try{await open_($('pw').value);}catch{$('gerr').textContent='Şifre yanlış';}});
+['kur','kdv','q'].forEach(id=>$(id).addEventListener('input',render));
+(async()=>{let pw=null;try{pw=localStorage.getItem('pc_pw');}catch{} if(pw){try{await open_(pw);}catch{}}})();
+</script>
+</body>
+</html>
