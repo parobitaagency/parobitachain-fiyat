@@ -142,7 +142,7 @@ async function open_(pw){
 }
 $('gf').addEventListener('submit',async e=>{e.preventDefault();const btn=$('gf').querySelector('button');btn.disabled=true;btn.textContent='Açılıyor… (fotoğraflar yükleniyor)';$('gerr').textContent='';try{await open_($('pw').value.trim());}catch(err){btn.disabled=false;btn.textContent='Aç';$('gerr').textContent=(err&&err.name==='OperationError')?'Şifre yanlış':'Açılamadı: '+(err&&err.message||err);}});
 ['kur','kdv','q'].forEach(id=>$(id).addEventListener('input',render));
-(async()=>{let pw=null;const h=decodeURIComponent(location.hash.slice(1));if(h){pw=h;try{history.replaceState(null,'',location.pathname);}catch{}}if(!pw){try{pw=localStorage.getItem('pc_pw');}catch{}} if(pw){try{await open_(pw);}catch{}}})();
+(async()=>{let pw=null;const h=decodeURIComponent(location.hash.slice(1));if(h){pw=h;}if(!pw){try{pw=localStorage.getItem('pc_pw');}catch{}} if(pw){try{await open_(pw);}catch{}}})();
 </script>
 </body>
 </html>
