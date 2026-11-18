@@ -132,7 +132,7 @@ async function open_(pw){
   try{localStorage.setItem('pc_pw',pw);}catch{}
   $('gate').remove(); render(); loadKur();
 }
-$('gf').addEventListener('submit',async e=>{e.preventDefault();$('gerr').textContent='';try{await open_($('pw').value);}catch{$('gerr').textContent='Şifre yanlış';}});
+$('gf').addEventListener('submit',async e=>{e.preventDefault();const btn=$('gf').querySelector('button');btn.disabled=true;btn.textContent='Açılıyor… (fotoğraflar yükleniyor)';$('gerr').textContent='';try{await open_($('pw').value.trim());}catch(err){btn.disabled=false;btn.textContent='Aç';$('gerr').textContent=(err&&err.name==='OperationError')?'Şifre yanlış':'Açılamadı: '+(err&&err.message||err);}});
 ['kur','kdv','q'].forEach(id=>$(id).addEventListener('input',render));
 (async()=>{let pw=null;try{pw=localStorage.getItem('pc_pw');}catch{} if(pw){try{await open_(pw);}catch{}}})();
 </script>
