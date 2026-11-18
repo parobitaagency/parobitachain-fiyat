@@ -2,14 +2,22 @@
 <html lang="tr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PC Fiyat">
+<meta name="theme-color" content="#0b0b0b">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
 <meta name="robots" content="noindex,nofollow">
 <title>ParobitaChain — Fotoğraflı Alış Fiyatları</title>
 <style>
   :root{--bg:#0b0b0b;--card:#141414;--line:#262626;--fg:#f2f2f2;--mute:#8a8a8a;--acc:#e8d9b5;--warn:#ff8a5c}
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 -apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}
-  header{position:sticky;top:0;z-index:5;background:rgba(11,11,11,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+  header{position:sticky;top:0;padding-top:env(safe-area-inset-top);z-index:5;background:rgba(11,11,11,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
   .bar{max-width:1280px;margin:0 auto;padding:14px 20px;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center}
   h1{font-size:16px;letter-spacing:.08em;text-transform:uppercase;margin:0;font-weight:600}
   .ctl{display:flex;gap:16px;align-items:center;color:var(--mute);font-size:13px;flex-wrap:wrap}
